@@ -1,26 +1,42 @@
 import React from 'react';
-import logo from './logo.svg';
+import ReactDOM  from 'react-dom';
+import Request from 'superagent';
+import {Winner} from './Winner';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component{
+
+  constructor(props){
+    super(props);
+    this.getWinners=this.getWinners.bind(this);
+    this.state={winners:[]}
+  }
+
+  getWinners(){
+    let pattern=ReactDOM.findDOMNode(this.refs.pattern).value;
+     Request.get("http://localhost:9999/winners/all/"+pattern).then
+     (
+       (response)=>{
+           this.state.winners=response.body;
+           this.setState(this.state);
+
+       }
+     ).catch(
+       ()=>{console.log("error")}
+     );
+  }
+
+  render(){
+     let code=this.state.winners.map((x)=>
+     <Winner key={x.id} winner={x}></Winner>);
+      return(
+        <div className="home">
+            Search winner  <input type="text" ref="pattern" onKeyUp={this.getWinners}/>
+            {code}
+        </div>
+      );
+  }
 }
+
 
 export default App;
